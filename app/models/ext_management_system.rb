@@ -448,29 +448,45 @@ class ExtManagementSystem < ApplicationRecord
   end
 
   def destroy_queue
-    _log.info("Queuing destroy of #{self.class.name} with id: #{id}")
+    msg = "Queuing destroy of #{self.class.name} with id: #{id}"
+
+    _log.info(msg)
+    task = MiqTask.create(
+      :name    => "Destroying #{self.class.name} with id: #{id}",
+      :state   => MiqTask::STATE_QUEUED,
+      :status  => MiqTask::STATUS_OK,
+      :message => msg,
+    )
+
     child_managers.each(&:destroy_queue)
-    self.class.schedule_destroy_queue(id)
+    self.class.schedule_destroy_queue(id, task.id)
+
+    task.id
   end
 
-  def self.schedule_destroy_queue(id, deliver_on = nil)
+  def self.schedule_destroy_queue(id, task_id, deliver_on = nil)
     MiqQueue.put(
       :class_name  => name,
       :instance_id => id,
       :method_name => "orchestrate_destroy",
       :deliver_on  => deliver_on,
+      :args        => [task_id],
     )
   end
 
   # Wait until all associated workers are dead to destroy this ems
-  def orchestrate_destroy
+  def orchestrate_destroy(task_id)
     disable! if enabled?
 
     if self.destroy == false
       _log.info("Cannot destroy #{self.class.name} with id: #{id}, workers still in progress. Requeuing destroy...")
       self.class.schedule_destroy_queue(id, 15.seconds.from_now)
     else
-      _log.info("#{self.class.name} with id: #{id} destroyed")
+      msg = "#{self.class.name} with id: #{id} destroyed"
+      _log.info(msg)
+
+      task = MiqTask.find_by(:id => task_id)
+      task.update_status(:state => MiqTask::STATE_FINISHED, :msg => msg) unless task.nil?
     end
   end
 
