@@ -20,8 +20,7 @@ class EmsFolder < ApplicationRecord
 
   virtual_attribute :folder_path, :string, :uses => :all_relationships
 
-  delegate :queue_name_for_ems_operations, :to => :ext_management_system, :allow_nil => true
-  delegate :my_zone, :to => :ext_management_system
+  delegate :queue_name_for_ems_operations, :queue_name_for_ems_refresh, :my_zone, :to => :ext_management_system, :allow_nil => true
 
   #
   # Relationship methods

@@ -57,7 +57,7 @@ module EmsRefresh
 
   def self.queue_refresh_new_target(ems, target_hash, target_class, target_find)
     MiqQueue.put(
-      :queue_name  => MiqEmsRefreshWorker.queue_name_for_ems(ems),
+      :queue_name  => ems.queue_name_for_ems_refresh,
       :class_name  => name,
       :method_name => 'refresh_new_target',
       :role        => "ems_inventory",
@@ -154,7 +154,7 @@ module EmsRefresh
 
   def self.queue_merge(targets, ems, create_task = false)
     queue_options = {
-      :queue_name  => ems.queue_name,
+      :queue_name  => ems.queue_name_for_ems_refresh,
       :class_name  => name,
       :method_name => 'refresh',
       :role        => "ems_inventory",

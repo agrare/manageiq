@@ -42,7 +42,7 @@ class EmsCluster < ApplicationRecord
 
   has_many :failover_hosts, -> { failover }, :class_name => "Host"
 
-  delegate :queue_name_for_ems_operations, :to => :ext_management_system, :allow_nil => true
+  delegate :queue_name_for_ems_operations, :queue_name_for_ems_refresh, :to => :ext_management_system, :allow_nil => true
 
   include ProviderObjectMixin
 
