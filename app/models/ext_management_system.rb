@@ -962,6 +962,24 @@ class ExtManagementSystem < ApplicationRecord
     stop_event_monitor_queue_on_credential_change
   end
 
+  def stop_worker_for_ems_queue(worker_class_name)
+    MiqQueue.put(
+      :class_name  => worker_class_name,
+      :method_name => :stop_worker_for_ems,
+      :priority    => MiqQueue::HIGH_PRIORITY,
+      :zone        => my_zone,
+      :queue_name  => 'miq_server',
+      :args        => [queue_name]
+    )
+  end
+
+  def stop_worker_for_ems_queue_on_change(worker_class_name)
+    return if     new_record?
+    return unless credentials_changed? || default_endpoint.changed.include_any?("hostname", "ipaddress")
+
+    stop_worker_for_ems_queue(worker_class_name)
+  end
+
   ###################################
   # Event Monitor
   ###################################
@@ -988,29 +1006,15 @@ class ExtManagementSystem < ApplicationRecord
   end
 
   def stop_event_monitor_queue
-    MiqQueue.put_unless_exists(
-      :class_name  => self.class.name,
-      :method_name => "stop_event_monitor",
-      :instance_id => id,
-      :priority    => MiqQueue::HIGH_PRIORITY,
-      :zone        => my_zone,
-      :role        => "event"
-    )
+    return if event_monitor_class.nil?
+
+    stop_worker_for_ems_queue(event_monitor_class)
   end
 
   def stop_event_monitor_queue_on_change
-    if event_monitor_class && !self.new_record? && default_endpoint.changed.include_any?("hostname", "ipaddress")
-      _log.info("EMS: [#{name}], Hostname or IP address has changed, stopping Event Monitor.  It will be restarted by the WorkerMonitor.")
-      stop_event_monitor_queue
-    end
+    stop_worker_for_ems_queue_on_change(event_monitor_class) if event_monitor_class
   end
-
-  def stop_event_monitor_queue_on_credential_change
-    if event_monitor_class && !self.new_record? && self.credentials_changed?
-      _log.info("EMS: [#{name}], Credentials have changed, stopping Event Monitor.  It will be restarted by the WorkerMonitor.")
-      stop_event_monitor_queue
-    end
-  end
+  alias stop_event_monitor_queue_on_credential_change stop_event_monitor_queue_on_change
 
   def blacklisted_event_names
     (
@@ -1032,49 +1036,10 @@ class ExtManagementSystem < ApplicationRecord
   end
   delegate :refresh_worker_class, :to => :class
 
-  def refresh_worker
-    return if refresh_worker_class.nil?
-
-    refresh_worker_class.find_by_ems(self).first
-  end
-
-  def start_refresh_worker
-    return if refresh_worker_class.nil?
-
-    refresh_worker_class.start_worker_for_ems(self)
-  end
-
-  def stop_refresh_worker
-    return if refresh_worker_class.nil?
-
-    _log.info("EMS [#{name}] id [#{id}]: Stopping Refresh Worker.")
-    refresh_worker_class.stop_worker_for_ems(self)
-  end
-
-  def stop_refresh_worker_queue
-    MiqQueue.put_unless_exists(
-      :class_name  => self.class.name,
-      :method_name => "stop_refresh_worker",
-      :instance_id => id,
-      :priority    => MiqQueue::HIGH_PRIORITY,
-      :zone        => my_zone,
-      :role        => "event"
-    )
-  end
-
   def stop_refresh_worker_queue_on_change
-    if refresh_worker_class && !self.new_record? && default_endpoint.changed.include_any?("hostname", "ipaddress")
-      _log.info("EMS: [#{name}], Hostname or IP address has changed, stopping Refresh Worker.  It will be restarted by the WorkerMonitor.")
-      stop_refresh_worker_queue
-    end
+    stop_worker_for_ems_queue_on_change(refresh_worker_class) if refresh_worker_class
   end
-
-  def stop_refresh_worker_queue_on_credential_change
-    if refresh_worker_class && !self.new_record? && self.credentials_changed?
-      _log.info("EMS: [#{name}], Credentials have changed, stopping Refresh Worker.  It will be restarted by the WorkerMonitor.")
-      stop_refresh_worker_queue
-    end
-  end
+  alias stop_refresh_worker_queue_on_credential_change stop_refresh_worker_queue_on_change
 
   # @return [Boolean] true if a datastore exists for this type of ems
   def self.datastore?
