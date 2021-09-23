@@ -6,7 +6,7 @@ module MiqServer::WorkerManagement::Base::Monitor::SystemLimits
   TYPE_TO_DEFAULT_ALGORITHM = {
     :kill  => :used_swap_percent_gt_value,
     :start => :used_swap_percent_lt_value
-  }
+  }.freeze
 
   def kill_workers_due_to_resources_exhausted?
     return false if MiqEnvironment::Command.is_podified?
@@ -37,6 +37,7 @@ module MiqServer::WorkerManagement::Base::Monitor::SystemLimits
       sys = MiqSystem.memory
 
       return false if sys[:SwapTotal].nil? || sys[:SwapFree].nil? || sys[:MemFree].nil? || sys[:SwapTotal] == 0
+
       used = sys[:SwapTotal] - sys[:SwapFree] - sys[:MemFree]
       pct_used = used / sys[:SwapTotal].to_f * 100
     rescue => err
@@ -57,6 +58,7 @@ module MiqServer::WorkerManagement::Base::Monitor::SystemLimits
       sys = MiqSystem.memory
 
       return true if sys[:SwapTotal].nil? || sys[:SwapFree].nil? || sys[:MemFree].nil? || sys[:SwapTotal] == 0
+
       used = sys[:SwapTotal] - sys[:SwapFree] - sys[:MemFree]
       pct_used = used / sys[:SwapTotal].to_f * 100
     rescue => err
@@ -123,7 +125,7 @@ module MiqServer::WorkerManagement::Base::Monitor::SystemLimits
 
   def build_algorithm_name(name, type)
     real_algorithm_name = "#{type}_algorithm_#{name}" if name && type
-    unless real_algorithm_name && self.respond_to?(real_algorithm_name)
+    unless real_algorithm_name && respond_to?(real_algorithm_name)
       default = TYPE_TO_DEFAULT_ALGORITHM[type]
       _log.warn("Using default algorithm: [#{default}] since [#{name}] is not a valid algorithm")
       real_algorithm_name = "#{type}_algorithm_#{default}"
