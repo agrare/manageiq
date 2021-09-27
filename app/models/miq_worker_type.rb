@@ -28,6 +28,10 @@ class MiqWorkerType < ApplicationRecord
     pluck(:worker_type)
   end
 
+  def self.worker_classes
+    worker_class_names.map(&:constantize)
+  end
+
   def self.worker_class_names_in_kill_order
     in_kill_order.pluck(:worker_type)
   end
