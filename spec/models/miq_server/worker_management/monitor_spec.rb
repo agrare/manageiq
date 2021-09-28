@@ -10,15 +10,15 @@ RSpec.describe MiqServer::WorkerManagement do
     end
 
     before do
-      server.worker_management.worker_add(worker.pid)
+      server.worker_manager.worker_add(worker.pid)
     end
 
     it "destroys an unresponsive 'stopping' worker" do
       expect(Process).to receive(:kill).with("TERM", worker.pid)
       expect(Process).to receive(:kill).with(9, worker.pid)
       worker.update(:last_heartbeat => 20.minutes.ago)
-      server.worker_management.stop_worker(worker)
-      server.worker_management.check_not_responding
+      server.worker_manager.stop_worker(worker)
+      server.worker_manager.check_not_responding
       server.reload
       expect(server.miq_workers).to be_empty
       expect { worker.reload }.to raise_error(ActiveRecord::RecordNotFound)
@@ -27,8 +27,8 @@ RSpec.describe MiqServer::WorkerManagement do
     it "monitors recently heartbeated 'stopping' workers" do
       expect(Process).to receive(:kill).with("TERM", worker.pid)
       worker.update(:last_heartbeat => 1.minute.ago)
-      server.worker_management.stop_worker(worker)
-      server.worker_management.check_not_responding
+      server.worker_manager.stop_worker(worker)
+      server.worker_manager.check_not_responding
       server.reload
       expect(server.miq_workers.first.id).to eq(worker.id)
     end
@@ -46,14 +46,14 @@ RSpec.describe MiqServer::WorkerManagement do
 
         expect(ManageIQ::Providers::BaseManager::EventCatcher).not_to receive(:sync_workers)
         expect(MiqGenericWorker).to receive(:sync_workers).and_return(:adds => [111])
-        expect(server.worker_management.sync_workers).to eq("MiqGenericWorker"=>{:adds=>[111]})
+        expect(server.worker_manager.sync_workers).to eq("MiqGenericWorker"=>{:adds=>[111]})
       end
 
       it "rescues exceptions and moves on" do
         allow(MiqWorkerType).to receive(:worker_class_names).and_return(%w(MiqGenericWorker MiqPriorityWorker))
         allow(MiqGenericWorker).to receive(:sync_workers).and_raise
         expect(MiqPriorityWorker).to receive(:sync_workers).and_return(:adds => [123])
-        expect(server.worker_management.sync_workers).to eq("MiqPriorityWorker"=>{:adds=>[123]})
+        expect(server.worker_manager.sync_workers).to eq("MiqPriorityWorker"=>{:adds=>[123]})
       end
     end
   end
