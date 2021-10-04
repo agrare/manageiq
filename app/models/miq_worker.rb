@@ -133,27 +133,7 @@ class MiqWorker < ApplicationRecord
   end
 
   def self.sync_workers
-    w       = include_stopping_workers_on_synchronize ? find_alive : find_current_or_starting
-    current = w.length
-    desired = workers
-    result  = {:adds => [], :deletes => []}
-
-    if current != desired
-      _log.info("Workers are being synchronized: Current #: [#{current}], Desired #: [#{desired}]")
-
-      if desired > current && enough_resource_to_start_worker?
-        (desired - current).times { result[:adds] << start_worker.pid }
-      elsif desired < current
-        w = w.to_a
-        (current - desired).times do
-          ww = w.pop
-          result[:deletes] << ww.pid
-          ww.stop
-        end
-      end
-    end
-
-    result
+    workers.times.map { {} }
   end
 
   # Convert the Models name from MiqGenericWorker to :generic_worker

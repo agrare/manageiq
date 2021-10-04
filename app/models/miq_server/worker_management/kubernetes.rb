@@ -19,6 +19,11 @@ class MiqServer::WorkerManagement::Kubernetes < MiqServer::WorkerManagement
     sync_deployment_settings
   end
 
+  def start_worker(params)
+    raise
+    # TODO
+  end
+
   def cleanup_orphaned_worker_rows
     unless current_pods.empty?
       orphaned_rows = podified_miq_workers.where.not(:system_uid => current_pods.keys)

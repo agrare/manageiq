@@ -26,13 +26,24 @@ module MiqServer::WorkerManagement::Monitor
 
   def sync_workers
     MiqWorkerType.worker_class_names.map(&:constantize).each_with_object({}) do |klass, result|
-      result[klass.name] = klass.sync_workers
-      result[klass.name][:adds].each { |pid| worker_add(pid) unless pid.nil? }
+      current = current_workers(klass)
+      desired = klass.sync_workers
+
+      to_start = desired - current
+      to_stop  = current - desired
+
+      to_start.each do |params|
+        start_worker(params)
+      end
     rescue => error
       _log.error("Failed to sync_workers for class: #{klass.name}: #{error}")
       _log.log_backtrace(error)
       next
     end
+  end
+
+  def current_workers(_klass)
+    raise NotImplementedError
   end
 
   def cleanup_failed_workers

@@ -1,4 +1,9 @@
 class MiqServer::WorkerManagement::Systemd < MiqServer::WorkerManagement
+  def start_worker(params)
+    raise
+    # TODO
+  end
+
   def cleanup_failed_workers
     super
     cleanup_failed_systemd_services

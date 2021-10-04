@@ -5,11 +5,27 @@ class MiqServer::WorkerManagement::Process < MiqServer::WorkerManagement
     super
   end
 
+  def current_workers(klass)
+    klass.count.times.map { {} }
+  end
+
   def monitor_workers
     super
 
     monitor_active_workers
     do_system_limit_exceeded if kill_workers_due_to_resources_exhausted?
+  end
+
+  def start_worker(params)
+    # TODO
+    raise
+    pid = Kernel.spawn(
+      {"BUNDLER_GROUPS" => self.class.bundler_groups.join(",")},
+      command_line,
+      [:out, :err] => [Rails.root.join("log", "evm.log"), "a"]
+    )
+    Process.detach(pid)
+    pid
   end
 
   def cleanup_failed_workers
