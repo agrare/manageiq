@@ -213,7 +213,7 @@ group :scvmm, :manageiq_default do
 end
 
 group :vmware, :manageiq_default do
-  manageiq_plugin "manageiq-providers-vmware"
+  gem "manageiq-providers-vmware", :github => "agrare/manageiq-providers-vmware", :branch => "add_options_for_non_rails_event_catcher"
 end
 
 ### shared dependencies
