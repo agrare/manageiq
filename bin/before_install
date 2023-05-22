@@ -13,6 +13,10 @@ if [ -n "$CI" ]; then
   # Install gettext for I18n msgfmt specs
   sudo apt-get install -y gettext
   echo
+
+  # Install ansible-runner for ansible-runner execution specs
+  pip3 install ansible-runner
+  echo
 fi
 
 if [ -n "$CI" ]; then

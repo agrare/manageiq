@@ -8,6 +8,23 @@ RSpec.describe Ansible::Runner do
   let(:manageiq_venv_path)  { "/var/lib/manageiq/venv/python3.8/site-packages" }
   let(:ansible_python_path) { "/usr/local/lib64/python3.8/site-packages:/usr/local/lib/python3.8/site-packages:/usr/lib64/python3.8/site-packages:/usr/lib/python3.8/site-packages" }
 
+  describe ".available?" do
+    before { described_class.remove_instance_variable(:@available) rescue NameError }
+    after  { described_class.remove_instance_variable(:@available) rescue NameError }
+
+    it "when available" do
+      expect(described_class).to receive(:system).with(/^which ansible-runner/).and_return(true)
+
+      expect(described_class.available?).to be true
+    end
+
+    it "when not available" do
+      expect(described_class).to receive(:system).with(/^which ansible-runner/).and_return(false)
+
+      expect(described_class.available?).to be false
+    end
+  end
+
   describe ".run" do
     let(:playbook) { "/path/to/my/playbook" }
     before do
