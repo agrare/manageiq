@@ -10,7 +10,7 @@ RSpec.describe Ansible::Runner do
     it "runs a hello-world playbook" do
       response = Ansible::Runner.run(env_vars, extra_vars, File.join(__dir__, "runner/data/hello_world.yml"))
 
-      expect(response.return_code).to eq(0), "ansible-runner failed with:\n#{response.stderr}"
+      expect(response.return_code).to eq(0), "ansible-runner failed with:\n#{response.instance_variable_get(:@stderr)}"
       expect(response.human_stdout).to include('"msg": "Hello, world!"')
     end
   end
