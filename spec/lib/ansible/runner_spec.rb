@@ -9,8 +9,8 @@ RSpec.describe Ansible::Runner do
   let(:ansible_python_path) { "/usr/local/lib64/python3.8/site-packages:/usr/local/lib/python3.8/site-packages:/usr/lib64/python3.8/site-packages:/usr/lib/python3.8/site-packages" }
 
   describe ".available?" do
-    before { described_class.remove_instance_variable(:@available) rescue NameError }
-    after  { described_class.remove_instance_variable(:@available) rescue NameError }
+    before { begin; described_class.remove_instance_variable(:@available); rescue NameError; end }
+    after  { begin; described_class.remove_instance_variable(:@available); rescue NameError; end }
 
     it "when available" do
       expect(described_class).to receive(:system).with(/^which ansible-runner/).and_return(true)
