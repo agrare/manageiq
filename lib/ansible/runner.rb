@@ -230,7 +230,7 @@ module Ansible
                      AwesomeSpawn.run("ansible-runner", :env => env_vars_hash, :params => params)
                    end
 
-          res = response(base_dir, ansible_runner_method, result, debug)
+          res = response(base_dir, ansible_runner_method, result, debug).tap { |res| puts res.command_line; system("tree #{base_dir}") }
         ensure
           # Clean up the tmp dir for the sync method, for async we will clean it up after the job is finished and we've
           # read the output, that will be written into this directory.
