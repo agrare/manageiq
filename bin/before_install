@@ -23,7 +23,7 @@ if [ -n "$CI" ]; then
   python3.10 -c 'import site; print(":".join(site.getsitepackages()))'
 
   mkdir -p /tmp/ansible-runner-verify
-  ansible-runner run /tmp/ansible-runner-verify --json --ident result --playbook hello_world.yml --project-dir $APP_ROOT/spec/lib/ansible/runner/data
+  PYTHON_PATH=/usr/local/lib/python3.10/dist-packages:/usr/lib/python3/dist-packages:/usr/lib/python3.10/dist-packages ansible-runner run /tmp/ansible-runner-verify --json --ident result --playbook hello_world.yml --project-dir $APP_ROOT/spec/lib/ansible/runner/data
 
   exit 1
 fi
