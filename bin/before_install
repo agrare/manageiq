@@ -15,7 +15,7 @@ if [ -n "$CI" ]; then
   echo
 
   # Install ansible-runner for ansible-runner execution specs
-  pip3 install ansible-runner
+  pip3 install ansible-runner 'setuptools>=62.4.0'
   echo
 fi
 
