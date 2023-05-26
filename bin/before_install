@@ -21,10 +21,10 @@ if [ -n "$CI" ]; then
   set -x
   ansible-runner --version
   ansible --version
-  python_path=$(python3.10 -c 'import site; print(":".join(site.getsitepackages()))')
+  python3.10 -c 'import site; print(":".join(site.getsitepackages()))'
 
   mkdir -p /tmp/ansible-runner-verify
-  PYTHON_PATH=$python_path ansible-runner run /tmp/ansible-runner-verify --json --ident result --playbook hello_world.yml --project-dir $APP_ROOT/spec/lib/ansible/runner/data
+  PYTHON_PATH="$(python3.10 -c 'import site; print(":".join(site.getsitepackages()))')" ansible-runner run /tmp/ansible-runner-verify --json --ident result --playbook hello_world.yml --project-dir $APP_ROOT/spec/lib/ansible/runner/data
   set +x
 
   exit 1
