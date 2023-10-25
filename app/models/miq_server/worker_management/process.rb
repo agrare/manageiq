@@ -15,6 +15,15 @@ class MiqServer::WorkerManagement::Process < MiqServer::WorkerManagement
     do_system_limit_exceeded if kill_workers_due_to_resources_exhausted?
   end
 
+  def cleanup_orphaned_worker_rows
+    orphaned_rows = miq_workers.where.not(:pid => miq_processes.map(&:pid))
+    return if orphaned_rows.empty?
+
+    _log.warn("Removing orphaned worker rows without processes: #{orphaned_rows.collect(&:pid).inspect}")
+
+    orphaned_rows.destroy_all
+  end
+
   def monitor_active_workers
     # Monitor all remaining current worker records
     miq_workers.find_current_or_starting.each do |worker|

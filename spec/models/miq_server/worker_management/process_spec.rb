@@ -52,4 +52,19 @@ RSpec.describe MiqServer::WorkerManagement::Process do
       end
     end
   end
+
+  context "#cleanup_orphaned_worker_rows" do
+    let!(:worker) do
+      FactoryBot.create(:miq_worker, :type => "MiqGenericWorker", :miq_server => server, :status => MiqWorker::STATUS_CREATING, :last_heartbeat => 5.minutes.ago)
+    end
+
+    before { server.worker_manager.instance_variable_set(:@miq_processes, []) }
+    before { server.worker_manager.instance_variable_set(:@miq_processes, nil) }
+
+    it "removes this server's orphaned rows" do
+      byebug
+      server.worker_manager.cleanup_orphaned_worker_rows
+      expect(MiqWorker.count).to be_zero
+    end
+  end
 end

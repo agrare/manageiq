@@ -18,6 +18,10 @@ module MiqServer::WorkerManagement::Monitor
     # Cache a list of the native objects backing the miq_workers (e.g.: pods, services, or processes)
     sync_from_system
 
+    # Before syncing the workers check for any orphaned worker rows that don't have
+    # a current resource and delete them
+    cleanup_orphaned_worker_rows
+
     sync_monitor
 
     # Sync the workers after sync'ing the child worker settings
