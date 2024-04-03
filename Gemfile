@@ -138,7 +138,7 @@ group :cisco_intersight, :manageiq_default do
 end
 
 group :embedded_terraform, :manageiq_default do
-  manageiq_plugin "manageiq-providers-embedded_terraform"
+  gem "manageiq-providers-embedded_terraform", :git => "https://github.com/agrare/manageiq-providers-embedded_terraform", :branch => "add_opentofu_worker_container_image"
 end
 
 group :foreman, :manageiq_default do
