@@ -133,6 +133,10 @@ group :azure_stack, :manageiq_default do
   manageiq_plugin "manageiq-providers-azure_stack"
 end
 
+group :cisco_aci, :manageiq_default do
+  gem "manageiq-providers-cisco_aci", :git => "https://github.com/agrare/manageiq-providers-cisco_aci", :branch => "master"
+end
+
 group :cisco_intersight, :manageiq_default do
   manageiq_plugin "manageiq-providers-cisco_intersight"
 end
