@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+# Temporarily handle running from a fork
+repository = ENV["GITHUB_REPOSITORY"].split("/").last
+
 gemfile_lock_release = File.read("Gemfile.lock")
-gemfile_lock_release.gsub!(/GIT\n  remote: #{ENV["GITHUB_SERVER_URL"]}\/#{ENV["GITHUB_REPOSITORY"]}\n  revision: .+\n  branch: .+/, "PATH\n  remote: .\n")
+gemfile_lock_release.gsub!(/GIT\n  remote: #{ENV["GITHUB_SERVER_URL"]}\/ManageIQ\/#{repository}\n  revision: .+\n  branch: .+/, "PATH\n  remote: .\n")
 File.write("Gemfile.lock", gemfile_lock_release)
