@@ -53,7 +53,13 @@ module FixAuth
         #   the new key, during recrypt, the decryption with the legacy key
         #   doesn't raise an Exception as expected, but instead successfully
         #   decrypts and returns garbage.
-        new_value = old_value unless ManageIQ::Password.try_decrypt(new_value)&.valid_encoding?
+        unless ManageIQ::Password.try_decrypt(new_value)&.valid_encoding?
+          # Only keep old_value if it is really decryptable with the current key.
+          #   Otherwise the legacy key decrypted an invalid value to garbage,
+          #   so raise to let the caller handle it as invalid.
+          ManageIQ::Password.decrypt(old_value)
+          new_value = old_value
+        end
 
         new_value
       end
