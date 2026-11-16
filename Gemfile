@@ -48,7 +48,7 @@ gem "linux_admin",                      ">=3.0", "<5",       :require => false
 gem "listen",                           "~>3.2",             :require => false
 gem "manageiq-api-client",              "~>0.7",             :require => false
 gem "manageiq-loggers",                 "~>2.0",             :require => false
-gem "manageiq-messaging",               "~>2.2",             :require => false
+gem "manageiq-messaging",               "~>2.2",             :require => false, :git => "https://github.com/agrare/manageiq-messaging.git", :branch => "allow_all_kafka_options"
 gem "manageiq-password",                "~>1.0",             :require => false
 gem "manageiq-postgres_ha_admin",       "~>3.5",             :require => false
 gem "manageiq-ssh-util",                "~>0.2.0",           :require => false
@@ -296,7 +296,7 @@ group :web_socket, :manageiq_default do
 end
 
 group :appliance, :optional => true do
-  gem "manageiq-appliance_console",     "~>13.0",            :require => false
+  gem "manageiq-appliance_console",     "~>13.0",            :require => false, :git => "https://github.com/agrare/manageiq-appliance_console.git", :branch => "use_pkcs12_store_fips"
 end
 
 ### Development and test gems are excluded from appliance and container builds to reduce size and license issues
